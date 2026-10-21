@@ -36,15 +36,20 @@
 		;
 	}
 
-	function isCheckListChildGrowingTextArea(vm) {
-		const itemVm = vm?.$parent;
+	function findCheckListChildVm(vm) {
+		let current = vm?.$parent;
 
-		return (
-			itemVm
-			&& itemVm.$options?.name === 'CheckListChildItem'
-			&& itemVm.item
-			&& itemVm.item.parentId !== 0
-		);
+		while (current)
+		{
+			if (current.$options?.name === 'CheckListChildItem')
+			{
+				return current.item && current.item.parentId !== 0 ? current : null;
+			}
+
+			current = current.$parent;
+		}
+
+		return null;
 	}
 
 	function findCheckListVm(vm) {
@@ -75,7 +80,8 @@
 			return;
 		}
 
-		if (!isCheckListChildGrowingTextArea(this))
+		const itemVm = findCheckListChildVm(this);
+		if (!itemVm || itemVm.textReadOnly || itemVm.canAdd === false)
 		{
 			return;
 		}
@@ -86,7 +92,6 @@
 			return;
 		}
 
-		const itemVm = this.$parent;
 		const checkListVm = findCheckListVm(itemVm);
 		const textarea = this.$refs?.textarea;
 
@@ -209,8 +214,10 @@
 				text-align: right;
 			}
 
-			.check-list-widget-item.--parent > .check-list-widget > .check-list-widget-item .check-list-widget-child-item-title .b24-growing-text-area-display,
-			.check-list-widget-item.--parent > .check-list-widget > .check-list-widget-item .check-list-widget-child-item-title .b24-growing-text-area-edit {
+			.check-list-widget-item.--parent > .check-list-widget > .check-list-widget-item .check-list-widget-child-item-title > .b24-growing-text-area,
+			.check-list-widget-item.--parent > .check-list-widget > .check-list-widget-item .check-list-widget-child-item-title > .tasks-check-list-formatting-layer-display,
+			.check-list-widget-item.--parent > .check-list-widget > .check-list-widget-item .check-list-widget-child-item-title > .b24-growing-text-area-display,
+			.check-list-widget-item.--parent > .check-list-widget > .check-list-widget-item .check-list-widget-child-item-title > .b24-growing-text-area-edit {
 				flex: 1 1 auto;
 				min-width: 0;
 			}
